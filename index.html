@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<title>Dismissed — Abandoned School</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#050505;
+  font-family:Arial,sans-serif;
+  color:white;
+}
+
+canvas{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  background:#050505;
+}
+
+#menu,#end,#pause,#how{
+  position:fixed;
+  inset:0;
+  z-index:20;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  text-align:center;
+  background:
+    radial-gradient(circle at center,
+      rgba(70,20,10,.15),
+      rgba(0,0,0,.96));
+}
+
+.hidden{
+  display:none!important;
+}
+
+.title{
+  font-size:56px;
+  font-weight:900;
+  letter-spacing:5px;
+  color:#ff6b32;
+  text-shadow:
+    0 0 10px #ff3d00,
+    0 0 35px #8c2100;
+}
+
+.subtitle{
+  color:#aaa;
+  letter-spacing:5px;
+  margin:5px 0 35px;
+}
+
+button{
+  width:230px;
+  padding:14px;
+  margin:6px;
+  color:#eee;
+  background:rgba(25,25,25,.85);
+  border:1px solid #555;
+  border-left:4px solid #ff642f;
+  border-radius:5px;
+  font-size:17px;
+}
+
+button:active{
+  transform:scale(.96);
+  background:#3b2118;
+}
+
+#hud{
+  position:fixed;
+  z-index:5;
+  top:12px;
+  left:15px;
+  right:15px;
+  pointer-events:none;
+  text-shadow:0 2px 5px #000;
+}
+
+#time{
+  font-size:21px;
+  font-weight:bold;
+  color:#ff6330;
+}
+
+#battery{
+  width:130px;
+  height:7px;
+  margin-top:5px;
+  background:#222;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+#batteryBar{
+  height:100%;
+  width:100%;
+  background:#ff6a32;
+}
+
+#objective{
+  margin-top:7px;
+  font-size:14px;
+  color:#ddd;
+}
+
+#controls{
+  position:fixed;
+  z-index:10;
+  inset:0;
+  pointer-events:none;
+}
+
+#joystick{
+  position:absolute;
+  left:25px;
+  bottom:30px;
+  width:125px;
+  height:125px;
+  border:2px solid rgba(255,255,255,.3);
+  border-radius:50%;
+  pointer-events:auto;
+  background:rgba(255,255,255,.04);
+}
+
+#stick{
+  position:absolute;
+  width:52px;
+  height:52px;
+  left:34px;
+  top:34px;
+  border-radius:50%;
+  background:rgba(255,255,255,.28);
+}
+
+#actions{
+  position:absolute;
+  right:20px;
+  bottom:28px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  pointer-events:auto;
+}
+
+.action{
+  width:75px;
+  height:75px;
+  border-radius:50%;
+  padding:0;
+  margin:0;
+  font-size:13px;
+  border:2px solid #555;
+}
+
+#look{
+  position:absolute;
+  right:0;
+  top:0;
+  width:55%;
+  height:75%;
+  pointer-events:auto;
+}
+
+#message{
+  position:fixed;
+  z-index:8;
+  left:10%;
+  right:10%;
+  bottom:155px;
+  padding:13px 17px;
+  border-radius:9px;
+  background:rgba(0,0,0,.85);
+  border:1px solid #444;
+  text-align:center;
+  font-size:15px;
+  pointer-events:none;
+  opacity:0;
+  transition:.25s;
+}
+
+#dialog{
+  position:fixed;
+  z-index:30;
+  left:12px;
+  right:12px;
+  bottom:18px;
+  padding:16px;
+  background:rgba(5,5,5,.95);
+  border:1px solid #555;
+  border-left:4px solid #ff6633;
+  border-radius:9px;
+  line-height:1.5;
+  font-size:16px;
+}
+
+#dialog b{
+  color:#ff7040;
+}
+
+#crosshair{
+  position:fixed;
+  z-index:4;
+  left:50%;
+  top:50%;
+  width:16px;
+  height:16px;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+
+#crosshair:before,
+#crosshair:after{
+  content:"";
+  position:absolute;
+  background:rgba(255,255,255,.7);
+}
+
+#crosshair:before{
+  width:14px;
+  height:2px;
+  top:7px;
+  left:1px;
+}
+
+#crosshair:after{
+  height:14px;
+  width:2px;
+  left:7px;
+  top:1px;
+}
+
+#vignette{
+  position:fixed;
+  inset:0;
+  z-index:3;
+  pointer-events:none;
+  background:
+    radial-gradient(circle,
+      transparent 35%,
+      rgba(0,0,0,.35) 65%,
+      rgba(0,0,0,.9) 100%);
+}
+
+#flash{
+  position:fixed;
+  inset:0;
+  z-index:25;
+  pointer-events:none;
+  background:white;
+  opacity:0;
+}
+
+@media(max-width:700px){
+  .title{font-size:40px}
+}
+
+@media(orientation:portrait){
+  #rotate{
+    display:flex!important;
+  }
+}
+
+#rotate{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:100;
+  background:#050505;
+  color:white;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  flex-direction:column;
+  font-size:20px;
+}
+
+#rotate span{
+  font-size:55px;
+  margin-bottom:15px;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="game"></canvas>
+
+<div id="vignette"></div>
+<div id="crosshair"></div>
+<div id="flash"></div>
+
+<div id="hud" class="hidden">
+  <div id="time">23:00</div>
+  <div id="battery">
+    <div id="batteryBar"></div>
+  </div>
+  <div id="objective">
+    Cari jalan masuk ke sekolah.
+  </div>
+</div>
+
+<div id="message"></div>
+
+<div id="dialog" class="hidden"></div>
+
+<div id="controls" class="hidden">
+
+  <div id="look"></div>
+
+  <div id="joystick">
+    <div id="stick"></div>
+  </div>
+
+  <div id="actions">
+    <button class="action" id="act">ACT</button>
+    <button class="action" id="light">LIGHT</button>
+  </div>
+
+</div>
+
+<div id="menu">
+
+  <div class="title">DISMISSED</div>
+  <div class="subtitle">ABANDONED SCHOOL</div>
+
+  <button id="play">PLAY</button>
+  <button id="howBtn">HOW TO PLAY</button>
+  <button id="reset">RESET DATA</button>
+
+  <div style="margin-top:20px;color:#777;font-size:12px">
+    1080P • MOBILE EDITION
+  </div>
+
+</div>
+
+<div id="how" class="hidden">
+
+  <h2 style="color:#ff6934;margin-bottom:20px">
+    HOW TO PLAY
+  </h2>
+
+  <p style="max-width:330px;line-height:1.7;color:#ccc">
+    Gunakan joystick kiri untuk berjalan.
+    Geser sisi kanan layar untuk melihat.
+    <br><br>
+    <b>ACT</b> digunakan untuk mengambil barang,
+    membuka pintu dan berbicara.
+    <br><br>
+    <b>LIGHT</b> menyalakan senter.
+    Baterai terbatas.
+    <br><br>
+    Temukan laporan sekolah dan keluar sebelum
+    sesuatu menemukanmu.
+  </p>
+
+  <button id="back">BACK</button>
+
+</div>
+
+<div id="pause" class="hidden">
+
+  <h2 style="color:#ff6934;margin-bottom:20px">
+    PAUSED
+  </h2>
+
+  <button id="resume">RESUME</button>
+  <button id="menuBtn">MENU</button>
+
+</div>
+
+<div id="end" class="hidden">
+
+  <h1 id="endTitle" style="color:#ff6934">
+    ENDING
+  </h1>
+
+  <p id="endText"
+     style="max-width:350px;line-height:1.7;color:#ccc;margin:20px">
+  </p>
+
+  <button id="again">PLAY AGAIN</button>
+  <button id="endMenu">MENU</button>
+
+</div>
+
+<div id="rotate">
+  <span>⟳</span>
+  Putar HP ke mode landscape
+</div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   DISMISSED — ABANDONED SCHOOL
+   Pure HTML + CSS + JavaScript
+   ========================================================= */
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let width = 320;
+let height = 180;
+
+function resize(){
+  const ratio = 16/9;
+
+  if(innerWidth/innerHeight > ratio){
+    height = Math.floor(innerHeight * .72);
+    width = Math.floor(height * ratio);
+  }else{
+    width = Math.floor(innerWidth * .72);
+    height = Math.floor(width / ratio);
+  }
+
+  width = Math.max(240,Math.min(width,960));
+  height = Math.max(135,Math.min(height,540));
+
+  canvas.width = width;
+  canvas.height = height;
+
+  ctx.imageSmoothingEnabled = false;
+}
+
+window.addEventListener("resize",resize);
+resize();
+
+
+/* =========================================================
+   INPUT
+   ========================================================= */
+
+const keys = {
+  w:false,
+  a:false,
+  s:false,
+  d:false,
+  up:false,
+  down:false,
+  left:false,
+  right:false
+};
+
+let joystick = {
+  active:false,
+  x:0,
+  y:0
+};
+
+let look = {
+  active:false,
+  lastX:0
+};
+
+window.addEventListener("keydown",e=>{
+  if(e.key==="w" || e.key==="ArrowUp") keys.w=keys.up=true;
+  if(e.key==="s" || e.key==="ArrowDown") keys.s=keys.down=true;
+  if(e.key==="a" || e.key==="ArrowLeft") keys.a=keys.left=true;
+  if(e.key==="d" || e.key==="ArrowRight") keys.d=keys.right=true;
+
+  if(e.key==="e" || e.key===" "){
+    e.preventDefault();
+    action();
+  }
+
+  if(e.key==="f"){
+    toggleLight();
+  }
+
+  if(e.key==="Escape"){
+    pauseGame();
+  }
+});
+
+window.addEventListener("keyup",e=>{
+  if(e.key==="w" || e.key==="ArrowUp") keys.w=keys.up=false;
+  if(e.key==="s" || e.key==="ArrowDown") keys.s=keys.down=false;
+  if(e.key==="a" || e.key==="ArrowLeft") keys.a=keys.left=false;
+  if(e.key==="d" || e.key==="ArrowRight") keys.d=keys.left=false;
+});
+
+
+/* =========================================================
+   JOYSTICK
+   ========================================================= */
+
+const joy = document.getElementById("joystick");
+const stick = document.getElementById("stick");
+
+function joystickMove(e){
+
+  const r = joy.getBoundingClientRect();
+
+  let x = e.clientX-r.left-r.width/2;
+  let y = e.clientY-r.top-r.height/2;
+
+  const max = 48;
+  const len = Math.hypot(x,y);
+
+  if(len>max){
+    x=x/len*max;
+    y=y/len*max;
+  }
+
+  joystick.x=x/max;
+  joystick.y=y/max;
+
+  stick.style.transform=
+    `translate(${x}px,${y}px)`;
+}
+
+joy.addEventListener("pointerdown",e=>{
+  joystick.active=true;
+  joy.setPointerCapture(e.pointerId);
+  joystickMove(e);
+});
+
+joy.addEventListener("pointermove",e=>{
+  if(joystick.active) joystickMove(e);
+});
+
+joy.addEventListener("pointerup",()=>{
+  joystick.active=false;
+  joystick.x=0;
+  joystick.y=0;
+  stick.style.transform="translate(0,0)";
+});
+
+
+/* =========================================================
+   LOOK
+   ========================================================= */
+
+const lookZone=document.getElementById("look");
+
+lookZone.addEventListener("pointerdown",e=>{
+  look.active=true;
+  look.lastX=e.clientX;
+  lookZone.setPointerCapture(e.pointerId);
+});
+
+lookZone.addEventListener("pointermove",e=>{
+  if(!look.active)return;
+
+  const dx=e.clientX-look.lastX;
+
+  player.angle += dx*.006;
+
+  look.lastX=e.clientX;
+});
+
+lookZone.addEventListener("pointerup",()=>{
+  look.active=false;
+});
+
+
+/* =========================================================
+   MAP
+   ========================================================= */
+
+const maps=[
+
+[
+"################",
+"#..............#",
+"#....####......#",
+"#..............#",
+"#......D.......#",
+"#..............#",
+"#..####........#",
+"#..............#",
+"#..............#",
+"######X#########"
+],
+
+[
+"################",
+"#..............#",
+"#....####......#",
+"#..............#",
+"#......D.......#",
+"#..............#",
+"#......####....#",
+"#..............#",
+"#V.............#",
+"################"
+],
+
+[
+"################",
+"#..............#",
+"#..####........#",
+"#..............#",
+"#......D.......#",
+"#..............#",
+"#........####..#",
+"#..............#",
+"#V...........X.#",
+"################"
+]
+
+];
+
+let mapIndex=0;
+let map=maps[mapIndex];
+
+
+/* =========================================================
+   GAME STATE
+   ========================================================= */
+
+let gameRunning=false;
+let paused=false;
+
+let player={
+  x:2.5,
+  y:1.5,
+  angle:0,
+  speed:2.2
+};
+
+let state={
+  battery:100,
+  light:false,
+  key:false,
+  report:false,
+  bag:false,
+  floor:0,
+  time:23*60,
+  danger:false,
+  ending:false
+};
+
+let enemy={
+  x:12.5,
+  y:7.5,
+  speed:.55,
+  active:false,
+  freeze:0
+};
+
+let items=[];
+
+
+/* =========================================================
+   ITEMS
+   ========================================================= */
+
+function setupItems(){
+
+  items=[];
+
+  if(mapIndex===0){
+
+    items.push({
+      type:"key",
+      x:7.5,
+      y:7.5,
+      taken:false
+    });
+
+    items.push({
+      type:"battery",
+      x:12.5,
+      y:2.5,
+      taken:false
+    });
+
+  }
+
+  if(mapIndex===1){
+
+    items.push({
+      type:"bag",
+      x:4.5,
+      y:6.5,
+      taken:false
+    });
+
+    items.push({
+      type:"battery",
+      x:12.5,
+      y:7.5,
+      taken:false
+    });
+
+  }
+
+  if(mapIndex===2){
+
+    items.push({
+      type:"report",
+      x:5.5,
+      y:5.5,
+      taken:false
+    });
+
+    items.push({
+      type:"battery",
+      x:12.5,
+      y:2.5,
+      taken:false
+    });
+
+  }
+}
+
+
+/* =========================================================
+   COLLISION
+   ========================================================= */
+
+function wallAt(x,y){
+
+  const gx=Math.floor(x);
+  const gy=Math.floor(y);
+
+  if(gy<0 || gy>=map.length) return true;
+  if(gx<0 || gx>=map[gy].length) return true;
+
+  const c=map[gy][gx];
+
+  return c==="#";
+}
+
+
+function canMove(x,y){
+
+  const r=.22;
+
+  return !wallAt(x-r,y-r) &&
+         !wallAt(x+r,y-r) &&
+         !wallAt(x-r,y+r) &&
+         !wallAt(x+r,y+r);
+}
+
+
+/* =========================================================
+   START
+   ========================================================= */
+
+function startGame(){
+
+  document.getElementById("menu").classList.add("hidden");
+  document.getElementById("how").classList.add("hidden");
+  document.getElementById("end").classList.add("hidden");
+
+  document.getElementById("hud").classList.remove("hidden");
+  document.getElementById("controls").classList.remove("hidden");
+
+  mapIndex=0;
+  map=maps[0];
+
+  player.x=2.5;
+  player.y=1.5;
+  player.angle=0;
+
+  state={
+    battery:100,
+    light:false,
+    key:false,
+    report:false,
+    bag:false,
+    floor:0,
+    time:23*60,
+    danger:false,
+    ending:false
+  };
+
+  enemy={
+    x:12.5,
+    y:7.5,
+    speed:.55,
+    active:false,
+    freeze:0
+  };
+
+  setupItems();
+
+  gameRunning=true;
+  paused=false;
+
+  showMessage("Malam pertama dimulai...");
+
+  setTimeout(()=>{
+    showDialog(
+      "Pak Darto",
+      "Raka, jaga sekolah sampai pagi. Jangan masuk kelas 9B."
+    );
+  },800);
+}
+
+
+/* =========================================================
+   DIALOG
+   ========================================================= */
+
+let dialogOpen=false;
+
+function showDialog(name,text){
+
+  dialogOpen=true;
+
+  const d=document.getElementById("dialog");
+
+  d.innerHTML=
+    "<b>"+name+":</b> "+text+
+    "<br><small style='color:#777'>Tap untuk menutup</small>";
+
+  d.classList.remove("hidden");
+}
+
+document.getElementById("dialog").addEventListener("pointerdown",()=>{
+  dialogOpen=false;
+  document.getElementById("dialog").classList.add("hidden");
+});
+
+
+/* =========================================================
+   MESSAGE
+   ========================================================= */
+
+let messageTimer;
+
+function showMessage(text){
+
+  const m=document.getElementById("message");
+
+  m.textContent=text;
+  m.style.opacity=1;
+
+  clearTimeout(messageTimer);
+
+  messageTimer=setTimeout(()=>{
+    m.style.opacity=0;
+  },3000);
+}
+
+
+/* =========================================================
+   LIGHT
+   ========================================================= */
+
+function toggleLight(){
+
+  if(!gameRunning || dialogOpen)return;
+
+  if(!state.light && state.battery<=0){
+
+    showMessage("Baterai senter habis.");
+
+    return;
+  }
+
+  state.light=!state.light;
+
+  showMessage(
+    state.light
+    ?"Senter menyala."
+    :"Senter dimatikan."
+  );
+}
+
+
+/* =========================================================
+   ACTION
+   ========================================================= */
+
+function action(){
+
+  if(!gameRunning || paused || dialogOpen)return;
+
+  const tx=
+    player.x+
+    Math.cos(player.angle)*.9;
+
+  const ty=
+    player.y+
+    Math.sin(player.angle)*.9;
+
+  const cellX=Math.floor(tx);
+  const cellY=Math.floor(ty);
+
+  const tile=
+    map[cellY] &&
+    map[cellY][cellX];
+
+  /* EXIT */
+
+  if(tile==="X"){
+
+    if(state.report){
+
+      finish(
+        "GOOD ENDING",
+        "Kamu berhasil membawa laporan keluar dari sekolah. Pagi datang dan kebenaran akhirnya terbuka."
+      );
+
+    }else{
+
+      finish(
+        "NORMAL ENDING",
+        "Kamu berhasil keluar dari sekolah, tetapi rahasia kelas 9B masih tertinggal di dalam."
+      );
+
+    }
+
+    return;
+  }
+
+  /* DOOR */
+
+  if(tile==="D"){
+
+    if(!state.key && mapIndex===0){
+
+      showMessage("Pintu terkunci. Cari kuncinya.");
+
+      return;
+    }
+
+    showMessage("Pintu terbuka.");
+
+    return;
+  }
+
+  /* STAIRS */
+
+  if(tile==="V"){
+
+    changeFloor();
+
+    return;
+  }
+
+
+  /* ITEMS */
+
+  for(const item of items){
+
+    if(item.taken)continue;
+
+    const d=Math.hypot(
+      item.x-player.x,
+      item.y-player.y
+    );
+
+    if(d<1.25){
+
+      item.taken=true;
+
+      if(item.type==="key"){
+
+        state.key=true;
+
+        showMessage("Kamu mendapatkan kunci kelas.");
+
+      }
+
+      if(item.type==="battery"){
+
+        state.battery=
+          Math.min(100,state.battery+35);
+
+        showMessage("Baterai +35%");
+
+      }
+
+      if(item.type==="bag"){
+
+        state.bag=true;
+
+        showMessage("Tas Bayu ditemukan.");
+
+        setTimeout(()=>{
+          showDialog(
+            "Bayu",
+            "Itu tasku... tolong bawa ke kelas 9B."
+          );
+        },300);
+
+      }
+
+      if(item.type==="report"){
+
+        state.report=true;
+
+        showMessage("Laporan sekolah ditemukan.");
+
+        setTimeout(()=>{
+          showDialog(
+            "Raka",
+            "Jadi ini alasan mereka menutup sekolah..."
+          );
+        },300);
+
+      }
+
+      return;
+    }
+  }
+
+  /* NPC */
+
+  const npcDist=Math.hypot(
+    player.x-enemy.x,
+    player.y-enemy.y
+  );
+
+  if(npcDist<1.5){
+
+    showDialog(
+      "Suara asing",
+      "Kamu seharusnya tidak berada di sini..."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   FLOOR
+   ========================================================= */
+
+function changeFloor(){
+
+  mapIndex++;
+
+  if(mapIndex>=maps.length){
+
+    if(state.report){
+
+      finish(
+        "GOOD ENDING",
+        "Kamu berhasil menemukan bukti dan keluar dari sekolah sebelum pagi."
+      );
+
+    }else{
+
+      finish(
+        "ESCAPE ENDING",
+        "Kamu keluar dari sekolah. Namun masih ada sesuatu yang belum terungkap."
+      );
+
+    }
+
+    return;
+  }
+
+  map=maps[mapIndex];
+
+  state.floor=mapIndex;
+
+  player.x=2.5;
+  player.y=1.5;
+  player.angle=0;
+
+  enemy.x=13.5;
+  enemy.y=7.5;
+
+  setupItems();
+
+  showMessage(
+    "Lantai "+(mapIndex+1)
+  );
+}
+
+
+/* =========================================================
+   ENEMY AI
+   ========================================================= */
+
+function updateEnemy(dt){
+
+  if(mapIndex===0 && state.time<23*60+35){
+    enemy.active=false;
+    return;
+  }
+
+  enemy.active=true;
+
+  if(state.light){
+
+    const dx=player.x-enemy.x;
+    const dy=player.y-enemy.y;
+
+    const dist=Math.hypot(dx,dy);
+
+    if(dist<6){
+
+      const angleToPlayer=
+        Math.atan2(dy,dx);
+
+      let diff=
+        Math.atan2(
+          Math.sin(angleToPlayer-player.angle),
+          Math.cos(angleToPlayer-player.angle)
+        );
+
+      if(Math.abs(diff)<.55){
+
+        enemy.freeze=.5;
+
+      }
+
+    }
+
+  }
+
+  if(enemy.freeze>0){
+
+    enemy.freeze-=dt;
+
+    return;
+  }
+
+  const dx=player.x-enemy.x;
+  const dy=player.y-enemy.y;
+
+  const dist=Math.hypot(dx,dy);
+
+  if(dist<8){
+
+    enemy.x +=
+      dx/dist*
+      enemy.speed*
+      dt;
+
+    enemy.y +=
+      dy/dist*
+      enemy.speed*
+      dt;
+
+  }
+
+  if(dist<.55){
+
+    finish(
+      "DISMISSED",
+      "Sesuatu menemukanmu di lorong sekolah. Malam itu berakhir sebelum pagi."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   UPDATE
+   ========================================================= */
+
+function update(dt){
+
+  if(!gameRunning || paused)return;
+  if(dialogOpen)return;
+
+  let mx=joystick.x;
+  let my=joystick.y;
+
+  if(keys.w || keys.up) my=-1;
+  if(keys.s || keys.down) my=1;
+  if(keys.a || keys.left) mx=-1;
+  if(keys.d || keys.right) mx=1;
+
+  const speed=player.speed*dt;
+
+  const forwardX=Math.cos(player.angle);
+  const forwardY=Math.sin(player.angle);
+
+  const rightX=Math.cos(player.angle+Math.PI/2);
+  const rightY=Math.sin(player.angle+Math.PI/2);
+
+  const dx=
+    forwardX*(-my)*speed+
+    rightX*mx*speed;
+
+  const dy=
+    forwardY*(-my)*speed+
+    rightY*mx*speed;
+
+  if(canMove(player.x+dx,player.y))
+    player.x+=dx;
+
+  if(canMove(player.x,player.y+dy))
+    player.y+=dy;
+
+
+  /* BATTERY */
+
+  if(state.light){
+
+    state.battery-=dt*2.2;
+
+    if(state.battery<=0){
+
+      state.battery=0;
+      state.light=false;
+
+      showM
